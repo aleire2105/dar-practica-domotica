@@ -15,11 +15,11 @@ public class ManejadorCliente implements Runnable {
     @Override
     public void run() {
         try (
-            BufferedReader entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter salida = new PrintWriter(socket.getOutputStream(), true)
-        ) {
+                BufferedReader entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                PrintWriter salida = new PrintWriter(socket.getOutputStream(), true)) {
             String mensajeCliente;
-
+            boolean estaAutenticado = false;
+            
             while ((mensajeCliente = entrada.readLine()) != null) {
                 System.out.println("Recibido del cliente: " + mensajeCliente);
 
@@ -31,7 +31,9 @@ public class ManejadorCliente implements Runnable {
                         if (tokens.length == 3) {
                             String user = tokens[1];
                             String pass = tokens[2];
-                            System.out.println("Intento de login de: " + user);
+                            System.out.println("Intento de login de: " + user + " (Contraseña: " + pass + ")");
+
+                            estaAutenticado = true;
 
                             salida.println("RES_LOGIN_OK " + user);
                         } else {
@@ -40,7 +42,13 @@ public class ManejadorCliente implements Runnable {
                         break;
 
                     case "REQ_LIST":
-                        salida.println("RES_LIST LUC1:ON CLI1:22 PER1:0");
+                        if (!estaAutenticado) {
+                            
+                            salida.println("ACK_ERR 401 NOT_AUTHENTICATED");
+                        } else {
+                            
+                            salida.println("RES_LIST LUC1:ON CLI1:22 PER1:0");
+                        }
                         break;
 
                     case "REQ_LOGOUT":
