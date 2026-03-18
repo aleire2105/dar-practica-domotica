@@ -44,9 +44,16 @@ public class ManejadorCliente implements Runnable {
                             String pass = tokens[2];
                             System.out.println("Intento de login de: " + user + " (Contraseña: " + pass + ")");
 
-                            estaAutenticado = true;
-
-                            salida.println("RES_LOGIN_OK " + user);
+                            // ¡NUEVO! Comprobamos que la contraseña sea exactamente "pass123"
+                            if (pass.equals("pass123")) {
+                                estaAutenticado = true;
+                                salida.println("RES_LOGIN_OK " + user);
+                                System.out.println("[LOG] Login exitoso para el usuario: " + user);
+                            } else {
+                                // Si la contraseña es distinta, denegamos el acceso
+                                salida.println("ACK_ERR 401 NOT_AUTHENTICATED");
+                                System.out.println("[LOG] Login fallido. Contraseña incorrecta.");
+                            }
                         } else {
                             salida.println("ACK_ERR 400 FORMATO_INCORRECTO");
                         }
@@ -121,13 +128,12 @@ public class ManejadorCliente implements Runnable {
                         break;
 
                     case "REQ_STATUS":
-                    
+
                         if (!estaAutenticado) {
                             salida.println("ACK_ERR 401 NOT_AUTHENTICATED");
                         } else if (tokens.length == 2) {
                             String idDispositivo = tokens[1];
 
-                            
                             if (inventario.containsKey(idDispositivo)) {
                                 String estadoActual = inventario.get(idDispositivo);
                                 salida.println("RES_STATUS " + idDispositivo + " " + estadoActual);
