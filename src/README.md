@@ -41,25 +41,15 @@ prefijo-disp       = "LUC" / "CLI" / "PER"
 estado-dispositivo = id-dispositivo ":" valor
 valor              = estado-luz / estado-num
 estado-luz         = "ON" / "OFF"
-estado-num         = 1*3DIGIT ; Valores entre 0 y 100 (persianas) o 20 y 30 (clima)
+estado-num         = 1*3DIGIT
 
-ALPHA = %x41-5A / %x61-7A ; Letras A-Z, a-z
-DIGIT = %x30-39           ; Números 0-9
+ALPHA = %x41-5A / %x61-7A
+DIGIT = %x30-39 de cierre de sesión, responde al cliente y cierra la conexión asociada.
+```
+
 
 ## 2. Diagrama de secuencia del protocolo
 
 Además de la especificación formal en ABNF, se incluye un diagrama de secuencia que representa el flujo principal de interacción entre cliente y servidor. Este diagrama permite visualizar de forma clara el intercambio de mensajes durante las fases de conexión, autenticación, consulta de dispositivos, control de actuadores y cierre de sesión.
 
-<img width="593" height="441" alt="SoWkIImgAStDuUKgoIp9ILLmpibCpIj9LT1LSCbCJ2zAp4rKI4bLS0KgIyalvkNYvOhMYbNGrRLJS4ajJixFIqq6IO34aVbW1SvmdXMONP5vU7EUGeXp04YrCufInz8IeAMPoH35GQw1yJx-xfv-2lxUw2gH3KM" src="https://github.com/user-attachments/assets/6e25e613-6956-4d70-85aa-ab4e260de309" />
-
-
-
-## 3. Diagramas de estados
-
-Para complementar la especificación del protocolo, se incluyen dos diagramas de estados: uno correspondiente al cliente y otro al servidor. Estos diagramas describen la evolución interna de ambos extremos de la comunicación en función de los eventos y mensajes intercambiados.
-
-### 3.1 Diagrama de estados del cliente
-El cliente pasa por los estados de desconectado, conectado y autenticado, pudiendo realizar distintas operaciones una vez validado por el servidor, hasta finalizar la sesión con la petición de logout.
-
-### 3.2 Diagrama de estados del servidor
-El servidor parte del estado de espera de conexión, acepta clientes entrantes y, tras una autenticación correcta, atiende las peticiones de consulta y control de dispositivos. Finalmente, al recibir la orden de cierre de sesión, responde al cliente y cierra la conexión asociada.
+<p align="center"> <img src="https://github.com/user-attachments/assets/6e25e613-6956-4d70-85aa-ab4e260de309" width="500"/> <br> <em>Figura 1. Diagrama de secuencia del protocolo.</em> </p>
