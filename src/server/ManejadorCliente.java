@@ -58,20 +58,22 @@ public class ManejadorCliente implements Runnable {
                 switch (comando) {
                     case "REQ_LOGIN":
                         if (tokens.length == 3) {
-                            String user = tokens[1];
-                            String hashRecibido = tokens[2];
+                            String user = tokens[1].trim();
+                            String hashRecibido = tokens[2].trim();
 
                             System.out.println("Intento de login de: " + user);
 
                             String hashEsperado = generarHashPassword("pass123");
 
-                            if (user.equals("admin") && hashRecibido.equals(hashEsperado)) {
+                            // Acepta cualquier usuario siempre que el hash de la contraseña sea correcto
+                            if (hashRecibido.equals(hashEsperado)) {
                                 estaAutenticado = true;
                                 salida.println("RES_LOGIN_OK " + user);
                                 System.out.println("[LOG] Login exitoso para el usuario: " + user);
                             } else {
                                 salida.println("ACK_ERR 401 NOT_AUTHENTICATED");
-                                System.out.println("[LOG] Login fallido. Hash incorrecto.");
+                                System.out
+                                        .println("[LOG] Login fallido para el usuario: " + user + ". Hash incorrecto.");
                             }
                         } else {
                             salida.println("ACK_ERR 400 FORMATO_INCORRECTO");
