@@ -41,12 +41,12 @@ public class MainCliente {
                         socket.getOutputStream(), true);
                 Scanner teclado = new Scanner(System.in)) {
 
-            System.out.println("Conectado al servidor en " + HOST + ":" + PUERTO);
-            System.out.println("Escribe comandos del protocolo. Ejemplo:");
-            System.out.println("REQ_LIST");
-            System.out.println("REQ_STATUS LUC1");
-            System.out.println("CMD_CONTROL LUC1 SET ON");
-            System.out.println("REQ_LOGOUT");
+            System.out.println("Comandos disponibles:");
+            System.out.println("REQ_LOGIN <usuario> <password>   -> Iniciar sesión");
+            System.out.println("REQ_LIST                        -> Listar dispositivos");
+            System.out.println("REQ_STATUS <ID>                 -> Consultar estado de un dispositivo");
+            System.out.println("CMD_CONTROL <ID> SET <valor>    -> Modificar un dispositivo");
+            System.out.println("REQ_LOGOUT                      -> Cerrar sesión");
 
             while (true) {
 

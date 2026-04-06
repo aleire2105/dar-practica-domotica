@@ -23,20 +23,24 @@ public class ManejadorCliente implements Runnable {
     }
 
     public ManejadorCliente(Socket socket) {
-        private static String generarHashPassword(String password) throws Exception {
-    String codificada = Base64.getEncoder()
-            .encodeToString(password.getBytes(StandardCharsets.UTF_8));
-
-    MessageDigest md = MessageDigest.getInstance("SHA-256");
-    byte[] hashBytes = md.digest(codificada.getBytes(StandardCharsets.UTF_8));
-
-    StringBuilder sb = new StringBuilder();
-    for (byte b : hashBytes) {
-        sb.append(String.format("%02x", b));
+        this.socket = socket;
     }
 
-    return sb.toString();
-}
+    private static String generarHashPassword(String password) throws Exception {
+        String codificada = Base64.getEncoder()
+                .encodeToString(password.getBytes(StandardCharsets.UTF_8));
+
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] hashBytes = md.digest(codificada.getBytes(StandardCharsets.UTF_8));
+
+        StringBuilder sb = new StringBuilder();
+        for (byte b : hashBytes) {
+            sb.append(String.format("%02x", b));
+        }
+
+        return sb.toString();
+    }
+
     }
 
     @Override
