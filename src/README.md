@@ -152,3 +152,17 @@ En cualquier momento, si el cliente envía una petición con formato incorrecto 
 
 
 
+## 6. Análisis de Tráfico de Red (Wireshark)
+
+En este repositorio se incluye el archivo `captura_domótica.pcap` que contiene la traza de red generada durante una ejecución estándar del cliente y el servidor.
+
+Al abrir el archivo en Wireshark (filtrando por `tcp.port == 8080`), se pueden observar claramente las tres fases de la comunicación:
+
+1. **Establecimiento de la conexión (Three-way Handshake):**
+   Se observa el intercambio inicial de paquetes TCP (`SYN`, `SYN-ACK`, `ACK`) entre la IP del cliente y la IP del servidor en el puerto 8080, confirmando la apertura del Socket.
+
+2. **Intercambio de mensajes del protocolo de aplicación:**
+   Mediante los paquetes marcados con el flag `PSH` (Push), se observa la transferencia de datos en texto plano. En la inspección de la carga útil (Payload) de estos paquetes se pueden identificar los comandos de nuestro protocolo, tales como la solicitud de autenticación (`REQ_LOGIN`) y las respuestas del servidor.
+
+3. **Cierre de la comunicación:**
+   Al finalizar la ejecución del cliente, se observa el intercambio de paquetes con el flag `FIN` (`FIN, ACK` -> `ACK`), que demuestra el cierre ordenado y la liberación de los recursos (cierre del Socket) por ambas partes.
