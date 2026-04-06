@@ -70,7 +70,8 @@ SP = %d32      ; Espacio en blanco
 ; --- 1. PETICIONES DEL CLIENTE ---
 peticion = peticion-login / peticion-list / peticion-control / peticion-status / peticion-logout
 
-peticion-login   = "REQ_LOGIN" SP usuario SP password
+peticion-login = "REQ_LOGIN" SP usuario SP hash
+hash = 1*(ALPHA / DIGIT)
 peticion-list    = "REQ_LIST"
 peticion-control = "CMD_CONTROL" SP id-dispositivo SP "SET" SP valor
 peticion-status  = "REQ_STATUS" SP id-dispositivo
