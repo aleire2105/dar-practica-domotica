@@ -5,28 +5,44 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Base64;
 
 public class MainCliente {
 
     private static final String HOST = "localhost";
     private static final int PUERTO = 8080;
 
+    private static String generarHashPassword(String password) throws Exception {
+        String codificada = Base64.getEncoder()
+                .encodeToString(password.getBytes(StandardCharsets.UTF_8));
+
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] hashBytes = md.digest(codificada.getBytes(StandardCharsets.UTF_8));
+
+        StringBuilder sb = new StringBuilder();
+        for (byte b : hashBytes) {
+            sb.append(String.format("%02x", b));
+        }
+
+        return sb.toString();
+    }
+
     public static void main(String[] args) {
 
         System.out.println("Conectando al servidor domótico...");
 
         try (
-            Socket socket = new Socket(HOST, PUERTO);
-            BufferedReader entradaServidor = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream()));
-            PrintWriter salidaServidor = new PrintWriter(
-                    socket.getOutputStream(), true);
-            Scanner teclado = new Scanner(System.in)
-        ) {
+                Socket socket = new Socket(HOST, PUERTO);
+                BufferedReader entradaServidor = new BufferedReader(
+                        new InputStreamReader(socket.getInputStream()));
+                PrintWriter salidaServidor = new PrintWriter(
+                        socket.getOutputStream(), true);
+                Scanner teclado = new Scanner(System.in)) {
 
             System.out.println("Conectado al servidor en " + HOST + ":" + PUERTO);
             System.out.println("Escribe comandos del protocolo. Ejemplo:");
-            System.out.println("REQ_LOGIN admin 1234");
             System.out.println("REQ_LIST");
             System.out.println("REQ_STATUS LUC1");
             System.out.println("CMD_CONTROL LUC1 SET ON");
@@ -37,6 +53,16 @@ public class MainCliente {
                 System.out.print("> ");
                 String comando = teclado.nextLine();
 
+                String[] partes = comando.trim().split("\\s+");
+
+                if (partes.length == 3 && partes[0].equalsIgnoreCase("REQ_LOGIN")) {
+                    String usuario = partes[1];
+                    String password = partes[2];
+
+                    String hashPassword = generarHashPassword(password);
+
+                    comando = "REQ_LOGIN " + usuario + " " + hashPassword;
+                }
                 salidaServidor.println(comando);
 
                 String respuesta = entradaServidor.readLine();

@@ -6,6 +6,9 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Base64;
 
 public class ManejadorCliente implements Runnable {
     private Socket socket;
@@ -20,7 +23,20 @@ public class ManejadorCliente implements Runnable {
     }
 
     public ManejadorCliente(Socket socket) {
-        this.socket = socket;
+        private static String generarHashPassword(String password) throws Exception {
+    String codificada = Base64.getEncoder()
+            .encodeToString(password.getBytes(StandardCharsets.UTF_8));
+
+    MessageDigest md = MessageDigest.getInstance("SHA-256");
+    byte[] hashBytes = md.digest(codificada.getBytes(StandardCharsets.UTF_8));
+
+    StringBuilder sb = new StringBuilder();
+    for (byte b : hashBytes) {
+        sb.append(String.format("%02x", b));
+    }
+
+    return sb.toString();
+}
     }
 
     @Override
@@ -41,18 +57,19 @@ public class ManejadorCliente implements Runnable {
                     case "REQ_LOGIN":
                         if (tokens.length == 3) {
                             String user = tokens[1];
-                            String pass = tokens[2];
-                            System.out.println("Intento de login de: " + user + " (Contraseña: " + pass + ")");
+                            String hashRecibido = tokens[2];
 
-                            // ¡NUEVO! Comprobamos que la contraseña sea exactamente "pass123"
-                            if (pass.equals("pass123")) {
+                            System.out.println("Intento de login de: " + user);
+
+                            String hashEsperado = generarHashPassword("pass123");
+
+                            if (user.equals("admin") && hashRecibido.equals(hashEsperado)) {
                                 estaAutenticado = true;
                                 salida.println("RES_LOGIN_OK " + user);
                                 System.out.println("[LOG] Login exitoso para el usuario: " + user);
                             } else {
-                                // Si la contraseña es distinta, denegamos el acceso
                                 salida.println("ACK_ERR 401 NOT_AUTHENTICATED");
-                                System.out.println("[LOG] Login fallido. Contraseña incorrecta.");
+                                System.out.println("[LOG] Login fallido. Hash incorrecto.");
                             }
                         } else {
                             salida.println("ACK_ERR 400 FORMATO_INCORRECTO");
