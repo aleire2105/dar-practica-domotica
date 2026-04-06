@@ -41,8 +41,6 @@ public class ManejadorCliente implements Runnable {
         return sb.toString();
     }
 
-    }
-
     @Override
     public void run() {
         try (
