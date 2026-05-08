@@ -11,6 +11,8 @@ public class MainServidor {
 
         try {
 
+            System.setProperty("java.rmi.server.hostname", "192.168.1.152");//aqui se pone la ip del servidor
+
             DomoticaInterfaz central = new DomoticaImplement();
 
             Registry registry = LocateRegistry.createRegistry(1099);
