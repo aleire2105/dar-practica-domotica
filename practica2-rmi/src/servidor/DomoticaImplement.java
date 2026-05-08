@@ -1,44 +1,147 @@
-package servidor; 
+package server;
 
-import common.DomoticaInterfaz; 
+import common.Dispositivo;
+import common.DomoticaException;
+import common.DomoticaInterfaz;
+
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DomoticaImplement extends UnicastRemoteObject implements DomoticaInterfaz {
-    private Map<String, Boolean> dispositivos;
+
+    private ConcurrentHashMap<String, Dispositivo> dispositivos;
+    private boolean autenticado;
 
     public DomoticaImplement() throws RemoteException {
         super();
-        dispositivos = new HashMap<>();
-        dispositivos.put("Luz_Salon", false);
-        dispositivos.put("Persiana_Cocina", false);
-        dispositivos.put("Aire_Acondicionado", false);
+
+        autenticado = false;
+
+        dispositivos = new ConcurrentHashMap<>();
+
+        dispositivos.put("LUC1",
+                new Dispositivo("LUC1", "Luz", "OFF"));
+
+        dispositivos.put("CLI1",
+                new Dispositivo("CLI1", "Climatizacion", "22"));
+
+        dispositivos.put("PER1",
+                new Dispositivo("PER1", "Persiana", "0"));
     }
 
     @Override
-    public synchronized void conmutarDispositivo(String id, boolean estado) throws RemoteException {
-        if (dispositivos.containsKey(id)) {
-            dispositivos.put(id, estado);
-            System.out.println("Dispositivo [" + id + "] cambiado a: " + (estado ? "ENCENDIDO" : "APAGADO"));
+    public void login(String usuario, String hashPassword)
+            throws RemoteException, DomoticaException {
+
+        String hashCorrecto =
+                "1eeac4d4b3d1c8f8b9b2f5cb06c5d2f8d9d0a51d1f7a8f4d2b7d8e4c9c2d6f4b";
+
+        if (hashPassword.equals(hashCorrecto)) {
+            autenticado = true;
+            System.out.println("Login correcto: " + usuario);
         } else {
-            throw new RemoteException("Error: El dispositivo '" + id + "' no existe.");
+            throw new DomoticaException("401 NOT_AUTHENTICATED");
+        }
+    }
+
+    private void comprobarLogin() throws DomoticaException {
+        if (!autenticado) {
+            throw new DomoticaException("401 NOT_AUTHENTICATED");
         }
     }
 
     @Override
-    public boolean getEstadoDispositivo(String id) throws RemoteException {
-        return dispositivos.getOrDefault(id, false);
+    public List<Dispositivo> listarDispositivos()
+            throws RemoteException, DomoticaException {
+
+        comprobarLogin();
+
+        return new ArrayList<>(dispositivos.values());
     }
 
     @Override
-    public Map<String, Boolean> obtenerEstadoGeneral() throws RemoteException {
-        return new HashMap<>(dispositivos);
+    public Dispositivo consultarEstado(String idDispositivo)
+            throws RemoteException, DomoticaException {
+
+        comprobarLogin();
+
+        if (!dispositivos.containsKey(idDispositivo)) {
+            throw new DomoticaException("404 DEVICE_NOT_FOUND");
+        }
+
+        return dispositivos.get(idDispositivo);
     }
 
     @Override
-    public String getNombreSistema() throws RemoteException {
-        return "Central de Domótica Inteligente RMI";
+    public synchronized Dispositivo cambiarEstado(String idDispositivo, String nuevoValor)
+            throws RemoteException, DomoticaException {
+
+        comprobarLogin();
+
+        if (!dispositivos.containsKey(idDispositivo)) {
+            throw new DomoticaException("404 DEVICE_NOT_FOUND");
+        }
+
+        Dispositivo d = dispositivos.get(idDispositivo);
+
+        boolean valido = false;
+
+        if (idDispositivo.startsWith("LUC")) {
+
+            if (nuevoValor.equals("ON") || nuevoValor.equals("OFF")) {
+                valido = true;
+            }
+
+        } else if (idDispositivo.startsWith("CLI")) {
+
+            try {
+                int temp = Integer.parseInt(nuevoValor);
+
+                if (temp >= 20 && temp <= 30) {
+                    valido = true;
+                }
+
+            } catch (Exception e) {
+                valido = false;
+            }
+
+        } else if (idDispositivo.startsWith("PER")) {
+
+            try {
+                int pos = Integer.parseInt(nuevoValor);
+
+                if (pos >= 0 && pos <= 100) {
+                    valido = true;
+                }
+
+            } catch (Exception e) {
+                valido = false;
+            }
+        }
+
+        if (!valido) {
+            throw new DomoticaException("422 INVALID_VALUE");
+        }
+
+        d.setValor(nuevoValor);
+
+        System.out.println("Dispositivo [" + idDispositivo +
+                "] cambiado a: " + nuevoValor);
+
+        return d;
+    }
+
+    @Override
+    public void logout()
+            throws RemoteException, DomoticaException {
+
+        comprobarLogin();
+
+        autenticado = false;
+
+        System.out.println("Sesion cerrada.");
     }
 }
