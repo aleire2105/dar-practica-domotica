@@ -7,6 +7,8 @@ Implementación de un sistema domótico distribuido utilizando Java RMI (Remote 
 
 El sistema sigue una arquitectura cliente-servidor donde un objeto remoto centralizado gestiona el estado de todos los dispositivos de la vivienda. Los clientes pueden conectarse remotamente, autenticarse y realizar operaciones de consulta y control sobre los dispositivos.
 ## Estructura del proyecto
+
+```text
 practica2-rmi/
 └── src/
     ├── client/
@@ -20,7 +22,7 @@ practica2-rmi/
     └── server/
         ├── DomoticaImplement.java
         └── MainServidor.java
-
+```
 ## Funcionalidades implementadas
 
 * Autenticación mediante hash SHA-256
